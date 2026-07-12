@@ -621,10 +621,9 @@ impl Statement<'_> {
 
             #[cfg(feature = "blob")]
             ToSqlOutput::ZeroBlob(len) => {
-                // TODO sqlite3_bind_zeroblob64 // 3.8.11
-                return self
-                    .conn
-                    .decode_result(unsafe { ffi::sqlite3_bind_zeroblob(ptr, ndx as c_int, len) });
+                return self.conn.decode_result(unsafe {
+                    ffi::sqlite3_bind_zeroblob64(ptr, ndx as c_int, len)
+                });
             }
             #[cfg(feature = "functions")]
             ToSqlOutput::Arg(_) => {
@@ -655,7 +654,7 @@ impl Statement<'_> {
             ValueRef::Blob(b) => unsafe {
                 let length = b.len();
                 if length == 0 {
-                    ffi::sqlite3_bind_zeroblob(ptr, ndx as c_int, 0)
+                    ffi::sqlite3_bind_zeroblob64(ptr, ndx as c_int, 0)
                 } else {
                     ffi::sqlite3_bind_blob64(
                         ptr,
